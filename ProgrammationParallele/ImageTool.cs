@@ -9,17 +9,82 @@ namespace ProgrammationParallele
         public string filePathSource = "./Images_source/";
         public string filePathResult = "./Images_result/";
 
-        public Image loadImage(string name)
+        /// <summary>
+        /// Traitement d'un image
+        /// Réduction de résolution + noir et blanc
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="saveNamePref"></param>
+        public void Imagetraitement(string name, string saveNamePref = null)
         {
-            Image img = Image.FromFile(string.Concat(filePathSource, $"/{name}.jpg"));
+            var size = new Size(500, 100);
+            var bitMapImage = ResizeImage(LoadImage(name), size);
 
-            return img;
+            SaveBitmapToImage(ChangeInBlackAndWith(bitMapImage), $"{name}_{size}{saveNamePref}");
         }
 
-        public Bitmap changeInBlackAndWith(Bitmap original)
+        /// <summary>
+        /// Chargement de l'image
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private Image LoadImage(string name)
+        {
+            return Image.FromFile(string.Concat(filePathSource, $"/{name}"));
+        }        
+
+        /// <summary>
+        /// Réduction de la résolution de l'image
+        /// </summary>
+        /// <param name="imgToResize"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        private Bitmap ResizeImage(Image imgToResize, Size size)
+        {
+            //Get the image current width
+            int sourceWidth = imgToResize.Width;
+
+            //Get the image current height
+            int sourceHeight = imgToResize.Height;
+            float nPercent = 0;
+            float nPercentW = 0;
+            float nPercentH = 0;
+
+            //Calulate width with new desired size
+            nPercentW = ((float)size.Width / (float)sourceWidth);
+            //Calculate height with new desired size
+            nPercentH = ((float)size.Height / (float)sourceHeight);
+
+            if (nPercentH < nPercentW)
+                nPercent = nPercentH;
+            else
+                nPercent = nPercentW;
+
+            //New Width
+            int destWidth = (int)(sourceWidth * nPercent);
+            //New Height
+            int destHeight = (int)(sourceHeight * nPercent);
+
+            Bitmap b = new(destWidth, destHeight);
+            Graphics g = Graphics.FromImage((Image)b);
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            // Draw image with new width and height
+            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
+            g.Dispose();
+
+            return b;           
+        }
+
+        /// <summary>
+        /// Conversion en noir et blanc
+        /// </summary>
+        /// <param name="original"></param>
+        /// <returns></returns>
+        private Bitmap ChangeInBlackAndWith(Bitmap original)
         {
 
-            Bitmap output = new Bitmap(original.Width, original.Height);
+            Bitmap output = new(original.Width, original.Height);
 
             for (int i = 0; i < original.Width; i++)
             {
@@ -44,34 +109,14 @@ namespace ProgrammationParallele
 
         }
 
-        public void resizeImage(Image imgToResize, Size size, string fileName)
+        /// <summary>
+        /// Sauvegarde de l'image générée
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="fileName"></param>
+        private void SaveBitmapToImage(Bitmap bitmap, string fileName)
         {
-            //Get the image current width
-            int sourceWidth = imgToResize.Width;
-            //Get the image current height
-            int sourceHeight = imgToResize.Height;
-            float nPercent = 0;
-            float nPercentW = 0;
-            float nPercentH = 0;
-            //Calulate width with new desired size
-            nPercentW = ((float)size.Width / (float)sourceWidth);
-            //Calculate height with new desired size
-            nPercentH = ((float)size.Height / (float)sourceHeight);
-            if (nPercentH < nPercentW)
-                nPercent = nPercentH;
-            else
-                nPercent = nPercentW;
-            //New Width
-            int destWidth = (int)(sourceWidth * nPercent);
-            //New Height
-            int destHeight = (int)(sourceHeight * nPercent);
-            Bitmap b = new Bitmap(destWidth, destHeight);
-            Graphics g = Graphics.FromImage((System.Drawing.Image)b);
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            // Draw image with new width and height
-            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
-            g.Dispose();
-            b.Save($"{filePathResult + fileName}.jpeg", ImageFormat.Jpeg);
+            bitmap.Save($"{filePathResult + fileName}.jpeg", ImageFormat.Jpeg);
         }
     }
 }
