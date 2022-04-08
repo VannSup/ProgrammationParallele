@@ -7,6 +7,8 @@ var imagesInfo = new DirectoryInfo(imageTool.filePathSource)?.GetFiles();
 ParallelTraietment(imagesInfo);
 SingleTraietment(imagesInfo);
 
+Console.ReadKey();
+
 /// <summary>
 /// Traitement parallel des images
 /// </summary>
